@@ -1,0 +1,20 @@
+# ---- Base Node ----
+FROM node:21 AS base
+WORKDIR /app
+COPY package*.json yarn.lock ./
+
+# ---- Dependencies ----
+FROM base AS dependencies
+COPY . .
+RUN yarn install && yarn cache clean
+
+# ---- Build ----
+FROM dependencies AS build
+RUN yarn build
+
+WORKDIR /app/packages/untp-test-suite
+RUN yarn build
+
+EXPOSE 3005
+
+CMD ["node", "/app/packages/untp-test-suite-server/index.js"]
